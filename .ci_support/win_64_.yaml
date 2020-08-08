@@ -2,11 +2,11 @@ channel_sources:
 - conda-forge,defaults
 channel_targets:
 - conda-forge main
-docker_image:
-- condaforge/linux-anvil-comp7
 go_compiler:
 - go-nocgo
 target_gobin:
-- ${PREFIX}/bin/
+- '%PREFIX%\bin\'
 target_goexe:
-- ''
+- .exe
+target_platform:
+- win-64
