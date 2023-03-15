@@ -1,11 +1,11 @@
-About rclone
-============
+About rclone-feedstock
+======================
+
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/rclone-feedstock/blob/main/LICENSE.txt)
 
 Home: https://rclone.org/
 
 Package license: MIT
-
-Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/rclone-feedstock/blob/main/LICENSE.txt)
 
 Summary: Rclone ("rsync for cloud storage") is a command line program to
 sync files and directories to and from different cloud storage providers.
