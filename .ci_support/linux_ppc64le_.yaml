@@ -1,7 +1,5 @@
 ace:
 - 8.0.5
-cdt_name:
-- conda
 channel_sources:
 - conda-forge
 channel_targets:
