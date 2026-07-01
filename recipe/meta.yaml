@@ -13,7 +13,7 @@ source:
   sha256: 3ba8bc7fb216f8f0307357ac67842467f453050468d5751e9269954819148568
 
 build:
-  number: 0
+  number: 1
   script:
     - go build -v -o {{ target_gobin }}{{ name }}{{ target_goexe }}
 
