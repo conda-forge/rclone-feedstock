@@ -1,5 +1,5 @@
 {% set goname = "github.com/rclone/rclone" %}
-{% set version = "1.74.3" %}
+{% set version = "1.75.0" %}
 
 {% set name = goname.split('/')[-1] %}
 {% set pkg_src = ('src/'+goname).replace("/",os.sep) %}
@@ -10,10 +10,10 @@ package:
 
 source:
   url: https://{{ goname }}/archive/v{{ version }}.tar.gz
-  sha256: 3ba8bc7fb216f8f0307357ac67842467f453050468d5751e9269954819148568
+  sha256: 1292c5fae9d10d6df3ea0c2ba96de42336e96e2e878729af1f02f86900434ee0
 
 build:
-  number: 1
+  number: 0
   script:
     - go build -v -o {{ target_gobin }}{{ name }}{{ target_goexe }}
 
