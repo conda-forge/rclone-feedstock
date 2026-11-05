@@ -16,10 +16,11 @@ build:
   number: 1
   script:
     # fs.Version: otherwise `rclone version` reports "v{{ version }}-DEV" (upstream's release builds set it the same way)
+    # -s, -trimpath: strip the symbol table and local paths, as upstream's release builds do
     # noselfupdate: drop `rclone selfupdate`, which would overwrite the binary conda installed
-    - go build -v -tags noselfupdate -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [not win]
+    - go build -v -trimpath -tags noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [not win]
     # cmount tag: adds `rclone mount` on Windows (WinFsp, loaded at run time; builds without cgo, like upstream's release)
-    - go build -v -tags cmount,noselfupdate -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [win]
+    - go build -v -trimpath -tags cmount,noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [win]
 
 requirements:
   build:
