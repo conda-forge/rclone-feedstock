@@ -21,6 +21,12 @@ build:
     - go build -v -trimpath -tags noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [not win]
     # cmount tag: adds `rclone mount` on Windows (WinFsp, loaded at run time; builds without cgo, like upstream's release)
     - go build -v -trimpath -tags cmount,noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [win]
+    # man page (shipped in the source) and shell completions; emulated builds can run the binary too
+    - mkdir -p $PREFIX/share/man/man1 $PREFIX/share/bash-completion/completions $PREFIX/share/zsh/site-functions $PREFIX/share/fish/vendor_completions.d  # [unix]
+    - cp rclone.1 $PREFIX/share/man/man1/rclone.1  # [unix]
+    - $PREFIX/bin/rclone completion bash $PREFIX/share/bash-completion/completions/rclone  # [unix]
+    - $PREFIX/bin/rclone completion zsh $PREFIX/share/zsh/site-functions/_rclone  # [unix]
+    - $PREFIX/bin/rclone completion fish $PREFIX/share/fish/vendor_completions.d/rclone.fish  # [unix]
 
 requirements:
   build:
@@ -34,6 +40,10 @@ test:
     - rclone mount --help  # [win]
     - rclone version | grep "go/tags:.*noselfupdate"  # [not win]
     - rclone version | findstr /C:"noselfupdate"  # [win]
+    - test -s $PREFIX/share/man/man1/rclone.1  # [unix]
+    - test -s $PREFIX/share/bash-completion/completions/rclone  # [unix]
+    - test -s $PREFIX/share/zsh/site-functions/_rclone  # [unix]
+    - test -s $PREFIX/share/fish/vendor_completions.d/rclone.fish  # [unix]
 
 about:
   home: https://rclone.org/
