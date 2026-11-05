@@ -16,7 +16,9 @@ build:
   number: 1
   script:
     # fs.Version: otherwise `rclone version` reports "v{{ version }}-DEV" (upstream's release builds set it the same way)
-    - go build -v -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}
+    - go build -v -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [not win]
+    # cmount tag: adds `rclone mount` on Windows (WinFsp, loaded at run time; builds without cgo, like upstream's release)
+    - go build -v -tags cmount -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [win]
 
 requirements:
   build:
@@ -27,6 +29,7 @@ test:
     - rclone version
     - rclone version | grep -x "rclone v{{ version }}"  # [not win]
     - rclone version | findstr /B /C:"rclone v{{ version }}"  # [win]
+    - rclone mount --help  # [win]
 
 about:
   home: https://rclone.org/
