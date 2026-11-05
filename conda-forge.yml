@@ -3,6 +3,7 @@ bot:
 provider:
   linux_aarch64: default
   osx_arm64: default
+  win_arm64: default
 build_platform:
   linux_ppc64le: linux_64
 conda_build:
