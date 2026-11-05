@@ -13,23 +13,52 @@ source:
   sha256: 68afd7f68c84bd978966feae2116339aa7bf454b39c573910c462e87c3774d5a
 
 build:
-  number: 0
+  number: 1
   script:
-    - go build -v -o {{ target_gobin }}{{ name }}{{ target_goexe }}
+    # fs.Version: otherwise `rclone version` reports "v{{ version }}-DEV" (upstream's release builds set it the same way)
+    # -s, -trimpath: strip the symbol table and local paths, as upstream's release builds do
+    # noselfupdate: drop `rclone selfupdate`, which would overwrite the binary conda installed
+    - go build -v -trimpath -tags noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [not win]
+    # cmount tag: adds `rclone mount` on Windows (WinFsp, loaded at run time; builds without cgo, like upstream's release)
+    - go build -v -trimpath -tags cmount,noselfupdate -ldflags "-s -X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}  # [win]
+    # licenses of all Go dependencies; bazil.org/fuse (linux only) is not recognised by go-licenses
+    # (BSD-3-Clause followed by extra notices), so its LICENSE is copied as is
+    - GOFLAGS="$GOFLAGS -tags=noselfupdate" go-licenses save . --save_path library_licenses --ignore bazil.org/fuse  # [unix]
+    - set "GOFLAGS=%GOFLAGS% -tags=cmount,noselfupdate"  # [win]
+    - go-licenses save . --save_path library_licenses --ignore bazil.org/fuse  # [win]
+    - mkdir -p library_licenses/bazil.org/fuse && cp "$(go env GOMODCACHE)/$(go list -m bazil.org/fuse | tr ' ' '@')/LICENSE" library_licenses/bazil.org/fuse/LICENSE  # [linux]
+    # man page (shipped in the source) and shell completions; emulated builds can run the binary too
+    - mkdir -p $PREFIX/share/man/man1 $PREFIX/share/bash-completion/completions $PREFIX/share/zsh/site-functions $PREFIX/share/fish/vendor_completions.d  # [unix]
+    - cp rclone.1 $PREFIX/share/man/man1/rclone.1  # [unix]
+    - $PREFIX/bin/rclone completion bash $PREFIX/share/bash-completion/completions/rclone  # [unix]
+    - $PREFIX/bin/rclone completion zsh $PREFIX/share/zsh/site-functions/_rclone  # [unix]
+    - $PREFIX/bin/rclone completion fish $PREFIX/share/fish/vendor_completions.d/rclone.fish  # [unix]
 
 requirements:
   build:
     - {{ compiler("go") }} >=1.13
+    - go-licenses
 
 test:
   commands:
     - rclone version
+    - rclone version | grep -x "rclone v{{ version }}"  # [not win]
+    - rclone version | findstr /B /C:"rclone v{{ version }}"  # [win]
+    - rclone mount --help  # [win]
+    - rclone version | grep "go/tags:.*noselfupdate"  # [not win]
+    - rclone version | findstr /C:"noselfupdate"  # [win]
+    - test -s $PREFIX/share/man/man1/rclone.1  # [unix]
+    - test -s $PREFIX/share/bash-completion/completions/rclone  # [unix]
+    - test -s $PREFIX/share/zsh/site-functions/_rclone  # [unix]
+    - test -s $PREFIX/share/fish/vendor_completions.d/rclone.fish  # [unix]
 
 about:
   home: https://rclone.org/
   license: MIT
   license_family: MIT
-  license_file: COPYING
+  license_file:
+    - COPYING
+    - library_licenses/
   summary: |
     Rclone ("rsync for cloud storage") is a command line program to
     sync files and directories to and from different cloud storage providers.
