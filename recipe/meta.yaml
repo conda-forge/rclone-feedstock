@@ -13,9 +13,10 @@ source:
   sha256: 68afd7f68c84bd978966feae2116339aa7bf454b39c573910c462e87c3774d5a
 
 build:
-  number: 0
+  number: 1
   script:
-    - go build -v -o {{ target_gobin }}{{ name }}{{ target_goexe }}
+    # fs.Version: otherwise `rclone version` reports "v{{ version }}-DEV" (upstream's release builds set it the same way)
+    - go build -v -ldflags "-X {{ goname }}/fs.Version=v{{ version }}" -o {{ target_gobin }}{{ name }}{{ target_goexe }}
 
 requirements:
   build:
@@ -24,6 +25,8 @@ requirements:
 test:
   commands:
     - rclone version
+    - rclone version | grep -x "rclone v{{ version }}"  # [not win]
+    - rclone version | findstr /B /C:"rclone v{{ version }}"  # [win]
 
 about:
   home: https://rclone.org/
